@@ -1,0 +1,17 @@
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '9221:9221'
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/usr/src/app
+
+  frontend:
+    build: ./frontend
+    ports:
+      - '9222:9222'
+    depends_on:
+      - backend

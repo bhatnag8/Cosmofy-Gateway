@@ -4,10 +4,32 @@ const fs = require('fs-extra');
 import path from 'path';
 import { gunzipSync } from 'zlib';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import dotenv from 'dotenv';
+import express from 'express';
 
-// Configuration - replace these with your actual values
-const ISSUER_ID = process.env.ISSUER_ID; // Your issuer ID from App Store Connect
-const KEY_ID = process.env.KEY_ID; // Your key ID from the generated API key
+dotenv.config();
+
+const app = express();
+const port = 9221;
+
+app.get('/generate-report', async (req, res) => {
+  try {
+    await getApps(); // Assuming getApps is the function that generates the report
+    res.status(200).send('Report generated successfully');
+  } catch (error) {
+    res.status(500).send('Error generating report');
+  }
+});
+
+
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
+const ISSUER_ID = process.env.ISSUER_ID;
+const KEY_ID = process.env.KEY_ID;
+const VENDOR_NUMBER = process.env.VENDOR_NUMBER;
 const PRIVATE_KEY_PATH = path.join(__dirname, `AuthKey_${KEY_ID}.p8`); // Path to your .p8 private key file
 const API_BASE_URL = 'https://api.appstoreconnect.apple.com/v1';
 
@@ -33,9 +55,10 @@ const token = jwt.sign(payload, privateKey, {
 
 // Function to make a request to the App Store Connect API
 // Cosmofy: XXXXXXXXXX
+let frequency = 'WEEKLY'
+let reportDate = '2024-06-16'
 const getApps = async () => {
-  let frequency = 'WEEKLY'
-  let reportDate = '2024-06-30'
+
   try {
     const response = await axios.get(`${API_BASE_URL}/salesReports`, {
       params: {
@@ -43,7 +66,7 @@ const getApps = async () => {
         'filter[reportDate]': reportDate,
         'filter[reportSubType]': 'SUMMARY',
         'filter[reportType]': 'SALES',
-        'filter[vendorNumber]': process.env.VENDOR_NUMBER
+        'filter[vendorNumber]': VENDOR_NUMBER
       },
       headers: {
         'Accept': 'application/a-gzip, application/json',
@@ -90,8 +113,9 @@ const createPdf = async (data: string, pdfPath: string) => {
   for (let line of lines) {
     if (line.trim() === '') continue; // Skip empty lines
     if (index > 0) {
-      const bytes = await fetch(formUrl).then(res => res.arrayBuffer())
-      const content = await PDFDocument.load(bytes)
+      const response = await axios.get(formUrl, { responseType: 'arraybuffer' });
+      const bytes = response.data;
+      const content = await PDFDocument.load(bytes);
       
       /** Start Edit **/
       const form = content.getForm()
@@ -153,8 +177,6 @@ const createPdf = async (data: string, pdfPath: string) => {
   return downloads
 };
 
-// Execute the function
-getApps();
 
 type ProductTypeInfo = {
   type: string;
