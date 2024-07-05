@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { Button, Typography, CircularProgress, Container, Paper } from '@mui/material';
+import * as React from "react";
+import './styles/App.css';
 import axios from 'axios';
-import './App.css';
+import { Button } from '@nextui-org/react';
 
-const App: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+
+function App() {
+
+  const [loading, setLoading] = React.useState(false);
+  const [message, setMessage] = React.useState('');
 
   const handleGenerateReport = async () => {
     setLoading(true);
@@ -20,23 +22,17 @@ const App: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Paper elevation={3} className="paper">
-        <Typography variant="h4" gutterBottom>
-          Report Generator
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleGenerateReport}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} /> : 'Generate Report'}
-        </Button>
-        {message && <Typography variant="body1" className="message">{message}</Typography>}
-      </Paper>
-    </Container>
+    <div className="App">
+      <Button
+        onPress={handleGenerateReport}
+        radius="full"
+        className="btn-gradient"
+        isLoading={loading}
+      >
+        Generate Report
+      </Button>
+    </div>
   );
-};
+}
 
 export default App;

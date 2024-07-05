@@ -56,7 +56,7 @@ const token = jwt.sign(payload, privateKey, {
 // Function to make a request to the App Store Connect API
 // Cosmofy: XXXXXXXXXX
 let frequency = 'WEEKLY'
-let reportDate = '2024-06-16'
+let reportDate = '2024-06-09'
 const getApps = async () => {
 
   try {
